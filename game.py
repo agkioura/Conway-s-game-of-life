@@ -1,11 +1,12 @@
-import pygame
-from pygame import Rect, Surface
+from pygame import Rect, Surface, draw, mouse, SRCALPHA
 
+from math import floor
 from enum import Enum
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0,)
 LINE_COLOR = (255, 0, 0)
+PLACEHOLDER_COLOR = (255, 255, 255, 100)
 
 class State(Enum):
     DEAD = 0
@@ -14,6 +15,10 @@ class State(Enum):
 class Game:
 
     def __init__(self) -> None:
+
+        # font.init()
+        # self.font = font.Font('Comic sans MS', 30)
+
         self.world_width = 20
         self.world_height = 20
 
@@ -22,6 +27,23 @@ class Game:
         self.board[self.world_height // 2][self.world_width // 2] = State.ALIVE
         self.board[self.world_height // 2][self.world_width // 2 + 1] = State.ALIVE
         self.board[self.world_height // 2][self.world_width // 2 + 2] = State.ALIVE
+
+        self.edit_mode = 0
+        self.selected_cell = (0, 0)
+
+    def toggle_edit_mode(self):
+        self.edit_mode = not self.edit_mode
+
+    def in_edit_mode(self):
+        return self.edit_mode
+
+    def place_cell(self):
+        cell_x, cell_y = self.selected_cell
+        if self.board[cell_y][cell_x] == State.ALIVE:
+            self.board[cell_y][cell_x] = State.DEAD
+        else:
+            self.board[cell_y][cell_x] = State.ALIVE
+
 
     def change_state(self, i, j, board) -> State:
         neighbour_cell_count = 0
@@ -57,8 +79,18 @@ class Game:
         cell_width = surface.get_size()[0] / self.world_width
         cell_height = surface.get_size()[1]/ self.world_height
 
+        if self.edit_mode:
+            x, y = mouse.get_pos()
+            cell_x = floor(x // cell_width)
+            cell_y = floor(y // cell_height)
+            self.selected_cell = (cell_x, cell_y)
+            placeholder = Rect((cell_x * cell_width, cell_y * cell_height), (cell_width, cell_height))
+            shape_surf = Surface(placeholder.size, SRCALPHA)
+            draw.rect(shape_surf, PLACEHOLDER_COLOR, shape_surf.get_rect())
+            surface.blit(shape_surf, placeholder)
+
         for i in range(self.world_height):
             for j in range(self.world_width):
-                cell = Rect((j * cell_width, i * cell_height), (cell_width, cell_height))
-                color = WHITE if self.board[i][j] == State.ALIVE else BLACK
-                pygame.draw.rect(surface, color, cell)
+                if self.board[i][j] == State.ALIVE:
+                    cell = Rect((j * cell_width, i * cell_height), (cell_width, cell_height))
+                    draw.rect(surface, WHITE, cell)

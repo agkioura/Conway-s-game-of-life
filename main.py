@@ -4,7 +4,7 @@ from game import Game
 def start():
     # pygame setup
     pygame.init()
-    screen = pygame.display.set_mode((800, 800))
+    screen = pygame.display.set_mode((700, 700))
     clock = pygame.time.Clock()
     running = True
 
@@ -17,6 +17,10 @@ def start():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     game.update()
+                if event.key == pygame.K_e:
+                    game.toggle_edit_mode()
+            if event.type == pygame.MOUSEBUTTONDOWN and game.in_edit_mode():
+                game.place_cell()
 
         screen.fill("black")
         game.render(screen)
