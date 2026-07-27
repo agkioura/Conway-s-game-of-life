@@ -14,7 +14,11 @@ def start():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    game.update()
 
+        screen.fill("black")
         game.render(screen)
 
         pygame.display.flip()
